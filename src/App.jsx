@@ -80,11 +80,12 @@ function App() {
         onSelect={(label) => {
           setActiveNav(label);
           setSidebarOpen(false);
-          if (label !== "Dashboard") showToast(`${label} view selected`);
         }}
       />
 
-      {sidebarOpen && <button className="mobile-backdrop" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />}
+      {sidebarOpen && ( 
+        <button className="mobile-  backdrop" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />
+      )}
 
       <main className="main-content">
         <Topbar
@@ -100,9 +101,15 @@ function App() {
         <div className="page-content">
           <section className="welcome-row">
             <div>
-              <p className="eyebrow">OVERVIEW</p>
-              <h1>Good morning, Alok <span>👋</span></h1>
-              <p className="subtitle">Here’s what’s happening with your business today.</p>
+              <p className="eyebrow">{activeNav === "Dashboard" ? "OVERVIEW" : activeNav.toUpperCase()}</p>
+              <h1>
+                {activeNav === "Dashboard" ? <>Good morning, Alok <span>👋</span></> : `${activeNav} Management`}
+              </h1>
+              <p className="subtitle">
+                {activeNav === "Dashboard"
+                  ? "Here’s what’s happening with your business today."
+                  : `Manage and monitor your ${activeNav.toLowerCase()} from here.`}
+              </p>
             </div>
             <button className="primary-btn" onClick={() => showToast("Report export started")}>
               <Download size={17} />
@@ -110,19 +117,82 @@ function App() {
             </button>
           </section>
 
-          <StatsGrid />
+          {activeNav === "Dashboard" && (
+            <>
+              <StatsGrid />
+              <section className="dashboard-grid">
+                <RevenueCard period={period} setPeriod={setPeriod} />
+                <ActivityCard />
+              </section>
+              <OrdersCard orders={filteredOrders} />
+              <section className="bottom-grid">
+                <ProfileCard />
+                <NotificationsCard onAction={() => showToast("All notifications marked as read")} />
+              </section>
+            </>
+          )}
 
-          <section className="dashboard-grid">
-            <RevenueCard period={period} setPeriod={setPeriod} />
-            <ActivityCard />
-          </section>
+          {activeNav === "Orders" && <OrdersCard orders={filteredOrders} />}
 
-          <OrdersCard orders={filteredOrders} />
+          {activeNav === "Customers" && (
+            <section className="stats-grid">
+              <article className="stat-card">
+                <div className="stat-top"><span className="stat-title">Total Customers</span><div className="stat-icon"><Users size={18} /></div></div>
+                <div className="stat-value">384</div>
+                <div className="stat-change"><span className="change-up">+18.7%</span><span>vs. previous month</span></div>
+              </article>
+              <article className="stat-card">
+                <div className="stat-top"><span className="stat-title">Active Customers</span><div className="stat-icon"><Users size={18} /></div></div>
+                <div className="stat-value">312</div>
+                <div className="stat-change"><span className="change-up">+12.4%</span><span>this month</span></div>
+              </article>
+              <article className="stat-card">
+                <div className="stat-top"><span className="stat-title">New Customers</span><div className="stat-icon"><Users size={18} /></div></div>
+                <div className="stat-value">72</div>
+                <div className="stat-change"><span className="change-up">+8.2%</span><span>this month</span></div>
+              </article>
+            </section>
+          )}
 
-          <section className="bottom-grid">
-            <ProfileCard />
-            <NotificationsCard onAction={() => showToast("All notifications marked as read")} />
-          </section>
+          {activeNav === "Products" && (
+            <section className="stats-grid">
+              <article className="stat-card">
+                <div className="stat-top"><span className="stat-title">Total Products</span><div className="stat-icon"><Package size={18} /></div></div>
+                <div className="stat-value">48</div>
+                <div className="stat-change"><span className="change-up">+6</span><span>this month</span></div>
+              </article>
+              <article className="stat-card">
+                <div className="stat-top"><span className="stat-title">Active Products</span><div className="stat-icon"><Package size={18} /></div></div>
+                <div className="stat-value">42</div>
+                <div className="stat-change"><span className="change-up">87.5%</span><span>active</span></div>
+              </article>
+              <article className="stat-card">
+                <div className="stat-top"><span className="stat-title">Low Stock</span><div className="stat-icon"><Package size={18} /></div></div>
+                <div className="stat-value">3</div>
+                <div className="stat-change"><span className="change-down">Attention</span><span>required</span></div>
+              </article>
+            </section>
+          )}
+
+          {activeNav === "Analytics" && (
+            <section className="dashboard-grid">
+              <RevenueCard period={period} setPeriod={setPeriod} />
+              <ActivityCard />
+            </section>
+          )}
+
+          {activeNav === "Settings" && (
+            <article className="card">
+              <div className="card-title-row">
+                <div><p className="eyebrow">ACCOUNT SETTINGS</p><h3>Workspace Settings</h3></div>
+              </div>
+              <div style={{ marginTop: "24px", display: "grid", gap: "18px" }}>
+                <div><strong>Workspace Name</strong><p className="muted">Acme Workspace</p></div>
+                <div><strong>Administrator</strong><p className="muted">Alok Mishra</p></div>
+                <button className="primary-btn" onClick={() => showToast("Settings saved successfully")} style={{ width: "fit-content" }}>Save Settings</button>
+              </div>
+            </article>
+          )}
         </div>
       </main>
 
@@ -177,7 +247,7 @@ function Sidebar({ open, active, onSelect }) {
           <div className="upgrade-icon"><Zap size={17} /></div>
           <strong>Upgrade workspace</strong>
           <p>Unlock advanced analytics and automation.</p>
-          <button onClick={() => onSelect("Billing")}>View plans →</button>
+          <button onClick={() => onSelect("Settings")}>View plans →</button>
         </div>
         <p className="version">Algoryx Dashboard v1.0</p>
       </div>
